@@ -90,6 +90,12 @@ surv_point_error <- survey %>%
     lidar_insitu_Hs_r2_points=r2fun(Hs_insitu,Hs_lidar) #R2 of survey vs lidar snow depth
   )
 
+surv_point_error_date <- survey %>%
+  dplyr::group_by(Identifier) %>% dplyr::summarise(
+    lidar_insitu_Hs_RMSE_points=RMSE(Hs_insitu,Hs_lidar), #RMSE of survey vs lidar snow depth
+    lidar_insitu_Hs_Bias_points=bias(Hs_insitu,Hs_lidar), #Bias of survey vs lidar snow depth
+    lidar_insitu_Hs_r2_points=r2fun(Hs_insitu,Hs_lidar) #R2 of survey vs lidar snow depth
+  )
 
 surv_point_error_all <- survey %>%
  dplyr::summarise(
@@ -100,6 +106,7 @@ surv_point_error_all <- survey %>%
 
 write.csv(survey, 'data/error_summary/Fortress_survey_data.csv')
 write.csv(surv_point_error, 'data/error_summary/Fortress_point_error.csv')
+write.csv(surv_point_error_date, 'data/error_summary/Fortress_error_byDate.csv')
 write.csv(surv_point_error_all, 'data/error_summary/Fortress_error_basinwide.csv')
 
 ####export shape file of all survey points to be read into arcgis####

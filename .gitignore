@@ -46,6 +46,7 @@ vignettes/*.pdf
 *.tif
 *.xml
 *.ovr
+*.gsg
 data/error_summary/
 data/Hs
 data/survey_data/BackupFiles/

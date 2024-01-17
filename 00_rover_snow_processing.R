@@ -16,7 +16,7 @@ surv_days <- list.files("F:/PointClouds/Fortress/Intensity") %>%
   substr(start = 0, 6)
 
 #factor to convert in situ snow depth to meters (lidar snow depth unit)
-Hs_conv_fact = 0.001
+Hs_conv_fact = 0.01
 
 # functions #######################################################
 angle2dec <- function(angle) {
