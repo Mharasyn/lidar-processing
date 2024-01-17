@@ -10,16 +10,15 @@ set BUFFER=20
 ::set cores to be n-1 on your processing machine
 set CORES=3
 ::list of 
-set list= 22_140 22_153_FT 22_292
-set local_path= Z:\lidar-processing
-set shp_name=ForestTower_clip
-set STEP=0.1
+set list= 21_176
+set local_path= Z:\lidar-processing-basin
+set shp_name=fortress_extent
+set STEP=1
 lastile -version
 pause
 
 FOR %%A IN (%list%) DO (
-lasclip -i %local_path%\data\point_cloud\%%A.las -poly %local_path%\data\shp\%shp_name%.shp -o %local_path%\data\clipped\%%A_clip.las -v
-pause
+lasclip -i F:\PointClouds\Fortress\Intensity\%%A.las -poly %local_path%\data\shp\%shp_name%.shp -o %local_path%\data\clipped\%%A_clip.las -v
 lasoptimize -i %local_path%\data\clipped\%%A_clip.las -o %local_path%\data\opt\%%A_opt.las -cpu64
 :: create temp1orary tile directory
 rmdir 1_tiles /s /q
@@ -29,13 +28,7 @@ lastile -i %local_path%\data\opt\%%A_opt.las ^
          -set_classification 0 ^
          -tile_size %TILE_SIZE% -buffer %BUFFER% -flag_as_withheld ^
          -o 1_tiles\tile.las
-rmdir 2_tiles_denoised /s /q
-mkdir 2_tiles_denoised
-lasnoise -i 1_tiles\tile*.las ^
-         -step 1 -isolated 25 ^
-         -remove_noise ^
-         -odir 2_tiles_denoised ^
-         -cores %CORES%
+
 rmdir 3_tiles_sorted /s /q
 mkdir 3_tiles_sorted
 lassort -i 1_tiles\*.las ^
@@ -46,18 +39,22 @@ mkdir 4_tiles_ground
 lasground_new -i 3_tiles_sorted\tile*.las ^
               -step 3 ^
               -extra_fine ^
-              -spike 0.5 ^
-              -spike_down 2.5 ^
+              -spike 0.05 ^
+              -spike_down 0.05 ^
               -ground_class 2 ^
               -odir 4_tiles_ground ^
               -cores %CORES%
 lasmerge -i 4_tiles_ground\tile*.las ^
          -drop_withheld ^
+		 -keep_class 2 ^
          -o %local_path%\data\class_points\%%A_class.las -olas
-blast2dem -i %local_path%\data\class_points\%%A_class.las^
-          -step %STEP% -keep_class 2 -o %local_path%\data\dsm\%%A.tif
+
+lasnoise -i %local_path%\data\class_points\%%A_class.las -step 1 -isolated 3 -remove_noise -cores %CORES% -o %local_path%\data\lasnoise\%%A.las -olas
+  
+blast2dem -i -o %local_path%\data\lasnoise\%%A.las -step %STEP% -drop_z_below 1960 -utm 11U -o %local_path%\data\dsm\%%A.tif
+		  
 rmdir 1_tiles /s /q
-rmdir 2_tiles_denoised /s /q
 rmdir 3_tiles_sorted /s /q
 rmdir 4_tiles_ground /s /q
+)
 )
